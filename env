@@ -1,0 +1,2 @@
+NODE_ENV=development
+sessionSecret=My Super Neat Secret Session Key String for Keeping my Sessions All Secret and Neat

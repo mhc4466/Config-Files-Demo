@@ -24,7 +24,7 @@
     "express-handlebars": "^4.0.2",
     "express-session": "^1.17.0",
     "mongoose": "^5.9.7",
-    "node-env-file": "^0.1.8",
+    "dotenv": "^8.2.0",
     "path": "^0.12.7",
     "redis": "^3.0.2",
     "serve-favicon": "^2.5.0",

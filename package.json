@@ -8,7 +8,7 @@
     "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\""
   },
-  "author": "Cody Van De Mark",
+  "author": "Cody Van De Mark / Austin Willoughby",
   "license": "Apache 2.0",
   "devDependencies": {
     "eslint": "^6.8.0",

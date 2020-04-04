@@ -9,11 +9,17 @@ const mongoose = require('mongoose');
 const expressHandlebars = require('express-handlebars');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
 const url = require('url');
 
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/ConfigExample';
 
-mongoose.connect(dbURL, (err) => {
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+
+mongoose.connect(dbURL, mongooseOptions, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
@@ -21,15 +27,21 @@ mongoose.connect(dbURL, (err) => {
 });
 
 let redisURL = {
-  hostname: 'localhost',
-  port: 6379,
+  hostname: 'localhost', // Replace with your redislabs hostname
+  port: 6379, // replace with your redislabs port
 };
 let redisPASS;
 
 if (process.env.REDISCLOUD_URL) {
   redisURL = url.parse(process.env.REDISCLOUD_URL);
-  redisPASS = redisURL.auth.split(':')[1];
+  [, redisPASS] = redisURL.auth.split(':');
 }
+
+const redisClient = redis.createClient({
+  host: redisURL.hostname,
+  port: redisURL.port,
+  password: redisPASS,
+});
 
 // pull in our routes
 const router = require('./router.js');
@@ -42,16 +54,16 @@ app.use(compression());
 app.use(bodyParser.urlencoded({
   extended: true,
 }));
+
 app.use(session({
   store: new RedisStore({
-    host: redisURL.hostname,
-    port: redisURL.port,
-    pass: redisPASS,
+    client: redisClient,
   }),
   secret: 'Secret Session Key',
   resave: true,
   saveUninitialized: true,
 }));
+
 app.engine('handlebars', expressHandlebars());
 app.set('view engine', 'handlebars');
 app.set('views', `${__dirname}/../views`);

@@ -43,12 +43,16 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(session({
+  key: 'sessionid',
   store: new RedisStore({
     client: redisClient,
   }),
   secret: 'Secret Session Key',
   resave: true,
   saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+  },
 }));
 
 app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));

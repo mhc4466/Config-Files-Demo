@@ -10,38 +10,25 @@ const expressHandlebars = require('express-handlebars');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
-const url = require('url');
 
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/ConfigExample';
 
-const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
-
-mongoose.connect(dbURL, mongooseOptions, (err) => {
+mongoose.connect(dbURL, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
   }
 });
 
-let redisURL = {
-  hostname: 'localhost', // Replace with your redislabs hostname
-  port: 6379, // replace with your redislabs port
-};
-let redisPASS;
-
-if (process.env.REDISCLOUD_URL) {
-  redisURL = url.parse(process.env.REDISCLOUD_URL);
-  [, redisPASS] = redisURL.auth.split(':');
-}
+const redisURL = process.env.REDISCLOUD_URL || 
+  'REPLACE_WITH_YOUR_REDISCLOUD_URL';
 
 const redisClient = redis.createClient({
-  host: redisURL.hostname,
-  port: redisURL.port,
-  password: redisPASS,
+  legacyMode: true,
+  url: redisURL,
 });
+redisClient.connect().catch(console.error);
+
 
 // pull in our routes
 const router = require('./router.js');
@@ -64,7 +51,7 @@ app.use(session({
   saveUninitialized: true,
 }));
 
-app.engine('handlebars', expressHandlebars());
+app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
 app.set('view engine', 'handlebars');
 app.set('views', `${__dirname}/../views`);
 app.use(favicon(path.resolve(`${__dirname}/../client/img/favicon.png`)));

@@ -12,15 +12,16 @@ const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/ConfigExample';
+const config = require('./config.js');
 
-mongoose.connect(dbURL, (err) => {
+mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
   }
 });
 
-const redisURL = process.env.REDISCLOUD_URL || 
+const redisURL = config.connections.redis || 
   'REPLACE_WITH_YOUR_REDISCLOUD_URL';
 
 const redisClient = redis.createClient({
@@ -58,7 +59,7 @@ app.use(session({
 app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
 app.set('view engine', 'handlebars');
 app.set('views', `${__dirname}/../views`);
-app.use(favicon(path.resolve(`${__dirname}/../client/img/favicon.png`)));
+app.use(favicon(path.resolve(`${config.staticAssets.path}/img/favicon.png`)));
 app.use(cookieParser());
 
 router(app);

@@ -11,7 +11,6 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 
-const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/ConfigExample';
 const config = require('./config.js');
 
 mongoose.connect(config.connections.mongo, (err) => {
@@ -34,10 +33,9 @@ redisClient.connect().catch(console.error);
 // pull in our routes
 const router = require('./router.js');
 
-const port = process.env.PORT || process.env.NODE_PORT || 3000;
-
 const app = express();
-app.use('/assets', express.static(path.resolve(`${__dirname}../../client/`)));
+//app.use('/assets', express.static(path.resolve(`${__dirname}../../client/`)));
+app.use('/assets', express.static(path.resolve(config.staticAssets.path)));
 app.use(compression());
 app.use(bodyParser.urlencoded({
   extended: true,
@@ -48,7 +46,7 @@ app.use(session({
   store: new RedisStore({
     client: redisClient,
   }),
-  secret: 'Secret Session Key',
+  secret: config.secret,
   resave: true,
   saveUninitialized: true,
   cookie: {
@@ -64,9 +62,9 @@ app.use(cookieParser());
 
 router(app);
 
-app.listen(port, (err) => {
+app.listen(config.connections.http.port, (err) => {
   if (err) {
     throw err;
   }
-  console.log(`Listening on port ${port}`);
+  console.log(`Listening on port ${config.connections.http.port}`);
 });
